@@ -1,3 +1,7 @@
+1. RotationZ when using Ellipsoid to do collision detection.
+2. Add method to update the animation directly to the time of the animation clip.
+
+
 /**
  * Exhibit A - Source Code Form License Notice
  *
