@@ -11,7 +11,7 @@ package alternativa.engine3d.collisions {
 	import alternativa.engine3d.alternativa3d;
 	import alternativa.engine3d.core.*;
 	import alternativa.engine3d.resources.Geometry;
-
+	
 	import flash.geom.Vector3D;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
@@ -37,6 +37,9 @@ package alternativa.engine3d.collisions {
 		 * Ellipsoid radius along Z axis.
 		 */
 		public var radiusZ:Number;
+		
+		// rotationZ, is this value compatible with the value of that rotationZ in the global space?
+		public var rotationZ:Number = 0;
 		
 		/**
 		 * Geometric error. Minimum absolute difference between two values
@@ -140,7 +143,7 @@ package alternativa.engine3d.collisions {
 			if (radiusZ > radius) radius = radiusZ;
 			
 			// The matrix of the collider
-			matrix.compose(source.x, source.y, source.z, 0, 0, 0, radiusX/radius, radiusY/radius, radiusZ/radius);
+			matrix.compose(source.x, source.y, source.z, 0, 0, rotationZ, radiusX/radius, radiusY/radius, radiusZ/radius);
 			inverseMatrix.copy(matrix);
 			inverseMatrix.invert();
 			

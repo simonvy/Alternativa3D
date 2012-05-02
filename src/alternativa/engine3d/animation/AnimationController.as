@@ -11,7 +11,7 @@ package alternativa.engine3d.animation {
 	import alternativa.engine3d.alternativa3d;
 	import alternativa.engine3d.animation.events.NotifyEvent;
 	import alternativa.engine3d.core.Object3D;
-
+	
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 
@@ -99,6 +99,42 @@ package alternativa.engine3d.animation {
 			}
 		}
 
+		// update with specified time.
+		public function updateWithTime(time:int):void {
+			var interval:Number;
+			if (lastTime < 0) {
+				lastTime = time;
+				interval = 0;
+			} else {
+				interval = 0.001*(time - lastTime);
+				lastTime = time;
+			}
+			if (_root == null) {
+				return;
+			}
+			var data:AnimationState;
+			// Cleaning
+			for each (data in states) {
+				data.reset();
+			}
+			_root.update(interval, 1);
+			// Apply the animation
+			for (var i:int = 0, count:int = _object3ds.length; i < count; i++) {
+				var object:Object3D = _object3ds[i];
+				data = states[object.name];
+				if (data != null) {
+					data.apply(object);
+				}
+			}
+			// Calls the notifications
+			for (var notify:AnimationNotify = nearestNotifyers; notify != null; notify = notify.processNext) {
+				if (notify.willTrigger(NotifyEvent.NOTIFY)) {
+					notify.dispatchEvent(new NotifyEvent(notify));
+				}
+			}
+			nearestNotifyers = null;
+		}
+		
 		/**
 		 * Plays animations on the time interval passed since the last <code>update()</code> call.
 		 * If <code>freeze()</code> method was called after the last <code>update(),</code>
