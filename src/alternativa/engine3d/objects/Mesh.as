@@ -162,6 +162,7 @@ package alternativa.engine3d.objects {
 		 * @private
 		 */
 		override alternativa3d function collectGeometry(collider:EllipsoidCollider, excludedObjects:Dictionary):void {
+			geometry.name = this.name;
 			collider.geometries.push(geometry);
 			collider.transforms.push(localToGlobalTransform);
 		}

@@ -64,6 +64,12 @@ package alternativa.engine3d.collisions {
 		private var indices:Vector.<int> = new Vector.<int>();
 		private var numTriangles:int;
 		
+		// (number, name) pairs, which indicates the triangles starting from index number belongs to the mesh of the given name.
+		// This array is filled in prepare and used in the collision detection.
+		private var triangleIndices:Array = new Array();
+		// the name of the collided object. This value is set in checkCollision.
+		private var collisionTargetName:String;
+		
 		private var radius:Number;
 		private var src:Vector3D = new Vector3D();
 		private var displ:Vector3D = new Vector3D();
@@ -193,6 +199,7 @@ package alternativa.engine3d.collisions {
 				if (object.childrenList != null) object.collectChildrenGeometry(this, excludedObjects);
 			}
 			
+			triangleIndices.splice(0, triangleIndices.length);
 			numTriangles = 0;
 			var indicesLength:int = 0;
 			var normalsLength:int = 0;
@@ -207,6 +214,13 @@ package alternativa.engine3d.collisions {
 				var transform:Transform3D = transforms[i];
 				var geometryIndicesLength:int = geometry._indices.length;
 				if (geometry._numVertices == 0 || geometryIndicesLength == 0) continue;
+				
+				if (triangleIndices.length > 0 && numTriangles == triangleIndices[triangleIndices.length - 2]) {
+					triangleIndices[triangleIndices.length - 1] = geometry.name;
+				} else {
+					triangleIndices.push(numTriangles, geometry.name);
+				}
+				
 				// Transform vertices
 				var vBuffer:VertexStream = (VertexAttributes.POSITION < geometry._attributesStreams.length) ? geometry._attributesStreams[VertexAttributes.POSITION] : null;
 				if (vBuffer != null) {
@@ -277,6 +291,8 @@ package alternativa.engine3d.collisions {
 			}
 			geometries.length = 0;
 			transforms.length = 0;
+			
+			triangleIndices.push(int.MAX_VALUE);
 		}
 		
 		/**
@@ -396,11 +412,16 @@ package alternativa.engine3d.collisions {
 		}
 		
 		private function checkCollision():Boolean {
+			collisionTargetName = "";
+			lastIndex = -2;
+			
 			var minTime:Number = 1;
 			var displacementLength:Number = displ.length;
 			// Loop triangles
 			var indicesLength:int = numTriangles*3;
 			for (var i:int = 0, j:int = 0; i < indicesLength;) {
+				// which triangle is this, used to identity the geometry and its mesh name.
+				var meshName:String = getGeometryNameForTriangle(i / 3);
 				// Points
 				var index:int = indices[i]*3; i++;
 				var ax:Number = vertices[index]; index++;
@@ -551,6 +572,7 @@ package alternativa.engine3d.collisions {
 						// Collision with closest point occurs
 						if (time < minTime) {
 							minTime = time;
+							collisionTargetName = meshName;
 							collisionPoint.x = faceX;
 							collisionPoint.y = faceY;
 							collisionPoint.z = faceZ;
@@ -571,6 +593,18 @@ package alternativa.engine3d.collisions {
 				}
 			}
 			return minTime < 1;
+		}
+		
+		private var lastIndex:int = 0;
+		private function getGeometryNameForTriangle(triangleNumber:uint):String {			
+			while (triangleNumber >= triangleIndices[lastIndex + 2]) {
+				lastIndex += 2;
+			}
+			return triangleIndices[lastIndex + 1];
+		}
+		
+		public function get collisionTarget():String {
+			return collisionTargetName;
 		}
 		
 	}

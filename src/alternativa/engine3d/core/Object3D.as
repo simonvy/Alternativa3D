@@ -1490,6 +1490,10 @@ package alternativa.engine3d.core {
 			var className:String = getQualifiedClassName(this);
 			return "[" + className.substr(className.indexOf("::") + 2) + " " + name + "]";
 		}
-
+		
+		public function get isTransformChanged():Boolean {
+			return this.transformChanged;
+		}
+		
 	}
 }

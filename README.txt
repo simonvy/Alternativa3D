@@ -1,5 +1,6 @@
 1. RotationZ when using Ellipsoid to do collision detection.
 2. Add method to update the animation directly to the time of the animation clip.
+3. EllipsoidCollider has the name of the collided mesh calculated as well. To identify the target, the way is to give every mesh a unique name.
 
 
 /**

@@ -52,7 +52,11 @@ package alternativa.engine3d.resources {
 	 * returns vector from coordinates: <Number>[x1,y1,z1,x2,y2,z2,x3,y3,z3].
 	 */
 	public class Geometry extends Resource {
-
+		
+		// the name of the mesh which contains this geometry.
+		// this value is used to identify the target mesh during the collision detection.
+		private var _name:String;
+		
 		/**
 		 * @private
 		 */
@@ -1009,6 +1013,19 @@ package alternativa.engine3d.resources {
 				if (z > boundBox.maxZ) boundBox.maxZ = z;
 			}
 		}
-
+		
+		public function get name():String {
+			return _name;
+		}
+		
+		public function set name(value:String):void {
+			if (_name == null) {
+				_name = value;
+			} else {
+				if (_name != value) {
+					throw new Error("geometry cannot be used for different meshes. (" + _name + ", " + value + ")");
+				}
+			}
+		}
 	}
 }
