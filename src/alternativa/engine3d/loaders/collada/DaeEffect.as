@@ -190,7 +190,10 @@ package alternativa.engine3d.loaders.collada {
 			else {
 				var image:DaeImage = param.getImage(setparams);
 				if(image != null){
-					material.textures[cloneString(param.data.localName())] = new ExternalTextureResource(cloneString(image.init_from));
+					var etr:ExternalTextureResource = new ExternalTextureResource(cloneString(image.init_from));
+					etr.repeatU = param.repeatU;
+					etr.repeatV = param.repeatV;
+					material.textures[cloneString(param.data.localName())] = etr;
 				}
 			}
 		}

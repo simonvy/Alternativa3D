@@ -28,6 +28,10 @@ package alternativa.engine3d.resources {
 	 */
 	public class TextureResource extends Resource {
 		
+		// material tiling
+		public var repeatU:Number = 1;
+		public var repeatV:Number = 1;
+		
 		/**
 		 * @private 
 		 */

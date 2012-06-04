@@ -56,6 +56,22 @@ package alternativa.engine3d.loaders.collada {
 			var attr:XML = data.texture.@texture[0];
 			return (attr == null) ? null : attr.toString();
 		}
+		
+		public function get repeatU():Number {
+			var text:XML = data.texture.extra.technique.(@profile == "MAYA").repeatU[0];
+			if (text) {
+				return Number(text);
+			}
+			return 1;
+		}
+		
+		public function get repeatV():Number {
+			var text:XML = data.texture.extra.technique.(@profile == "MAYA").repeatV[0];
+			if (text) {
+				return Number(text);
+			}
+			return 1;
+		}
 	
 		public function getSampler(setparams:Object):DaeParam {
 			var sid:String = texture;

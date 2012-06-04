@@ -108,7 +108,17 @@ package alternativa.engine3d.materials {
 		 * Pass UV to the fragment shader procedure
 		 */
 		static alternativa3d const _passUVProcedure:Procedure = new Procedure(["#v0=vUV", "#a0=aUV", "mov v0, a0"], "passUVProcedure");
-
+		
+		static alternativa3d const _passUVProcedureWithRepeatUV:Procedure = new Procedure([
+			"#v0=vUV",
+			"#a0=aUV", 
+			"#c0=cRepeatUV",
+			"mov t0, a0",
+			"mul t0.x, t0.x, c0.x",
+			"mul t0.y, t0.y, c0.y",
+			"mov v0, t0",
+		], "passUVProcedureWithRepeatUV");
+		
 		/**
 		 * Diffuse map.
 		 */
@@ -177,7 +187,7 @@ package alternativa.engine3d.materials {
 		 * @return
 		 */
 		private function getProgram(object:Object3D, programs:Vector.<ShaderProgram>, camera:Camera3D, opacityMap:TextureResource, alphaTest:int):ShaderProgram {
-			var key:int = (opacityMap != null ? 3 : 0) + alphaTest;
+			var key:int = (opacityMap != null ? 3 : 0) + alphaTest + ((diffuseMap.repeatU != 1 && diffuseMap.repeatV != 1) ? 6 : 0);
 			var program:ShaderProgram = programs[key];
 			if (program == null) {
 				// Make program
@@ -191,7 +201,11 @@ package alternativa.engine3d.materials {
 				}
 				vertexLinker.addProcedure(_projectProcedure);
 				vertexLinker.setInputParams(_projectProcedure, positionVar);
-				vertexLinker.addProcedure(_passUVProcedure);
+				if (diffuseMap.repeatU != 1 && diffuseMap.repeatV != 1) {
+					vertexLinker.addProcedure(_passUVProcedureWithRepeatUV);	
+				} else {
+ 					vertexLinker.addProcedure(_passUVProcedure);
+				}
 
 				// Pixel shader
 				var fragmentLinker:Linker = new Linker(Context3DProgramType.FRAGMENT);
@@ -228,6 +242,9 @@ package alternativa.engine3d.materials {
 			// Streams
 			drawUnit.setVertexBufferAt(program.vertexShader.getVariableIndex("aPosition"), positionBuffer, geometry._attributesOffsets[VertexAttributes.POSITION], VertexAttributes.FORMATS[VertexAttributes.POSITION]);
 			drawUnit.setVertexBufferAt(program.vertexShader.getVariableIndex("aUV"), uvBuffer, geometry._attributesOffsets[VertexAttributes.TEXCOORDS[0]], VertexAttributes.FORMATS[VertexAttributes.TEXCOORDS[0]]);
+			if (diffuseMap.repeatU != 1 && diffuseMap.repeatV != 1) {
+				drawUnit.setVertexConstantsFromNumbers(program.vertexShader.getVariableIndex("cRepeatUV"), diffuseMap.repeatU, diffuseMap.repeatV, 0, 0);	
+			}
 			//Constants
 			object.setTransformConstants(drawUnit, surface, program.vertexShader, camera);
 			drawUnit.setProjectionConstants(camera, program.vertexShader.getVariableIndex("cProjMatrix"), object.localToCameraTransform);
@@ -264,7 +281,7 @@ package alternativa.engine3d.materials {
 			}
 			var optionsPrograms:Vector.<ShaderProgram> = programsCache[object.transformProcedure];
 			if(optionsPrograms == null) {
-				optionsPrograms = new Vector.<ShaderProgram>(6, true);
+				optionsPrograms = new Vector.<ShaderProgram>(12, true);
 				programsCache[object.transformProcedure] = optionsPrograms;
 			}
 
